@@ -1,20 +1,7 @@
-@import "tailwindcss";
-
-:root {
-  --primary: #0052CC;
-  --secondary: #172B4D;
-
-  --todo: #94A3B8;
-  --progress: #3B82F6;
-  --review: #F59E0B;
-  --done: #22C55E;
-  --blocked: #EF4444;
-
-  --background: #F8FAFC;
-  --card: #FFFFFF;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
-  font-family: Inter, sans-serif;
-  background: var(--background);
+  margin: 0;
 }
