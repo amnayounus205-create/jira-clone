@@ -1,0 +1,47 @@
+export const projectData = [
+  {
+    id: 1,
+    name: "Jira Clone",
+    key: "JIRA",
+    description:
+      "Professional project management system inspired by Atlassian Jira.",
+    lead: "Muhammad Ali",
+    leadAvatar: "https://i.pravatar.cc/40?img=11",
+    members: 8,
+    tasks: 52,
+    progress: 72,
+    status: "Active",
+    startDate: "2026-08-01",
+    endDate: "2026-10-15",
+  },
+  {
+    id: 2,
+    name: "HR Management",
+    key: "HRM",
+    description:
+      "Manage HR operations, employees, payroll and attendance.",
+    lead: "Sarah Khan",
+    leadAvatar: "https://i.pravatar.cc/40?img=5",
+    members: 5,
+    tasks: 31,
+    progress: 25,
+    status: "Planning",
+    startDate: "2026-08-05",
+    endDate: "2026-11-01",
+  },
+  {
+    id: 3,
+    name: "E-Commerce",
+    key: "ECOM",
+    description:
+      "Modern e-commerce platform with order and inventory management.",
+    lead: "Ahmed Raza",
+    leadAvatar: "https://i.pravatar.cc/40?img=14",
+    members: 12,
+    tasks: 84,
+    progress: 100,
+    status: "Completed",
+    startDate: "2026-07-01",
+    endDate: "2026-08-01",
+  },
+];

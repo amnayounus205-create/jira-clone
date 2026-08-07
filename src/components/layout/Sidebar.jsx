@@ -1,4 +1,3 @@
-import React from "react";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -12,124 +11,118 @@ import {
   BarChart3,
   Building,
 } from "lucide-react";
+
 import { NavLink } from "react-router-dom";
+import useAuth from "../../features/auth/hooks/useAuth";
+import { ROLES } from "../../constants/roles";
+
+const menuConfig = {
+  [ROLES.SUPER_ADMIN]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Organizations", path: "/organizations", icon: Building },
+    { name: "Projects", path: "/projects", icon: FolderKanban },
+    { name: "Board", path: "/boards", icon: Kanban },
+    { name: "Backlog", path: "/backlog", icon: Layers },
+    { name: "Sprints", path: "/sprints", icon: Repeat },
+    { name: "Roadmap", path: "/roadmap", icon: MapPin },
+    { name: "Calendar", path: "/calendar", icon: Calendar },
+    { name: "Teams", path: "/teams", icon: Users },
+    { name: "Reports", path: "/reports", icon: BarChart3 },
+    { name: "Settings", path: "/settings", icon: Settings },
+  ],
+
+  [ROLES.ORGANIZATION_ADMIN]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Organizations", path: "/organizations", icon: Building },
+    { name: "Projects", path: "/projects", icon: FolderKanban },
+    { name: "Teams", path: "/teams", icon: Users },
+    { name: "Reports", path: "/reports", icon: BarChart3 },
+    { name: "Settings", path: "/settings", icon: Settings },
+  ],
+
+  [ROLES.PROJECT_MANAGER]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Projects", path: "/projects", icon: FolderKanban },
+    { name: "Board", path: "/boards", icon: Kanban },
+    { name: "Backlog", path: "/backlog", icon: Layers },
+    { name: "Sprints", path: "/sprints", icon: Repeat },
+    { name: "Calendar", path: "/calendar", icon: Calendar },
+    { name: "Reports", path: "/reports", icon: BarChart3 },
+  ],
+
+  [ROLES.SCRUM_MASTER]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Board", path: "/boards", icon: Kanban },
+    { name: "Backlog", path: "/backlog", icon: Layers },
+    { name: "Sprints", path: "/sprints", icon: Repeat },
+    { name: "Calendar", path: "/calendar", icon: Calendar },
+  ],
+
+  [ROLES.DEVELOPER]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Board", path: "/boards", icon: Kanban },
+    { name: "Backlog", path: "/backlog", icon: Layers },
+    { name: "Calendar", path: "/calendar", icon: Calendar },
+  ],
+
+  [ROLES.QA_TESTER]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Board", path: "/boards", icon: Kanban },
+    { name: "Projects", path: "/projects", icon: FolderKanban },
+    { name: "Reports", path: "/reports", icon: BarChart3 },
+  ],
+
+  [ROLES.VIEWER]: [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Projects", path: "/projects", icon: FolderKanban },
+    { name: "Reports", path: "/reports", icon: BarChart3 },
+  ],
+};
 
 const Sidebar = () => {
+  const { role } = useAuth();
+
+  const menus = menuConfig[role] || [];
+
   return (
-    <aside className="w-64 bg-[#172B4D] text-white min-h-screen flex flex-col">
-      <div className="text-2xl font-bold p-6 border-b border-slate-700">
-        Jira Clone
+    <aside className="w-64 min-h-screen bg-[#172B4D] text-white flex flex-col">
+
+      <div className="p-6 border-b border-slate-700">
+        <h1 className="text-2xl font-bold">
+          Jira Clone
+        </h1>
+
+        <p className="text-xs text-slate-300 mt-1">
+          {role}
+        </p>
       </div>
 
-      <nav className="space-y-1 p-4 flex-1 overflow-y-auto text-sm font-medium">
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <LayoutDashboard size={18} />
-          Dashboard
-        </NavLink>
+      <nav className="flex-1 p-4 space-y-1">
 
-        <NavLink
-          to="/boards"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <Kanban size={18} />
-          Board
-        </NavLink>
+        {menus.map((item) => {
+          const Icon = item.icon;
 
-        <NavLink
-          to="/backlog"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <Layers size={18} />
-          Backlog
-        </NavLink>
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-3 rounded-lg transition ${
+                  isActive
+                    ? "bg-[#0052CC] text-white"
+                    : "text-slate-300 hover:bg-slate-700"
+                }`
+              }
+            >
+              <Icon size={18} />
 
-        <NavLink
-          to="/sprints"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <Repeat size={18} />
-          Sprints
-        </NavLink>
+              {item.name}
+            </NavLink>
+          );
+        })}
 
-        <NavLink
-          to="/roadmap"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <MapPin size={18} />
-          Roadmap
-        </NavLink>
-
-        <NavLink
-          to="/projects"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <FolderKanban size={18} />
-          Projects
-        </NavLink>
-
-        <NavLink
-          to="/calendar"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <Calendar size={18} />
-          Calendar
-        </NavLink>
-
-        <NavLink
-          to="/teams"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <Users size={18} />
-          Teams
-        </NavLink>
-
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            `flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors ${
-              isActive ? "bg-[#0052CC] text-white" : "hover:bg-slate-700 text-slate-300"
-            }`
-          }
-        >
-          <Settings size={18} />
-          Settings
-        </NavLink>
       </nav>
+
     </aside>
   );
 };

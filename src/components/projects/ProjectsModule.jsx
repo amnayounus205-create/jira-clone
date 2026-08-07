@@ -1,404 +1,268 @@
-import React, { useState } from "react";
-import { FolderKanban, Plus, Search, MoreHorizontal, Users, Calendar, Trash2, Edit3, X, Filter } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import toast from "react-hot-toast";
 
-const initialProjects = [
-  { id: 1, name: "Jira Enterprise SaaS", key: "JIRA", lead: "Admin User", status: "Active", deadline: "Aug 30, 2026", issuesCount: 24 },
-  { id: 2, name: "P Foodie Mobile Case Study", key: "FOOD", lead: "Sarah Jenkins", status: "In Progress", deadline: "Sep 15, 2026", issuesCount: 16 },
-  { id: 3, name: "HR Management System", key: "HRMS", lead: "Alex Morgan", status: "Completed", deadline: "Jul 20, 2026", issuesCount: 42 },
-];
+import ProjectTable from "./ProjectTable";
+import ProjectModal from "./ProjectModal";
+import ConfirmDialog from "../ui/ConfirmDialog";
+import SearchInput from "../ui/SearchInput";
 
-export default function ProjectsModule() {
-  const [projects, setProjects] = useState(initialProjects);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  
-  // Modals States
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState(null);
-  const [projectToDelete, setProjectToDelete] = useState(null);
+import { projectData } from "./projectData";
 
-  // Form State for Create/Edit
-  const [formData, setFormData] = useState({ name: "", key: "", lead: "", deadline: "", status: "Active" });
+const ProjectsModule = () => {
+  const [projects, setProjects] = useState(projectData);
 
-  // 1. CREATE Project Handler
-  const handleCreateProject = (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.key) return;
+  const [open, setOpen] = useState(false);
 
-    const newProj = {
-      id: Date.now(),
-      name: formData.name,
-      key: formData.key.toUpperCase(),
-      lead: formData.lead || "Admin User",
-      status: formData.status || "Active",
-      deadline: formData.deadline || "TBD",
-      issuesCount: 0,
-    };
+  const [selectedProject, setSelectedProject] = useState(null);
 
-    setProjects([newProj, ...projects]);
-    setFormData({ name: "", key: "", lead: "", deadline: "", status: "Active" });
-    setIsCreateOpen(false);
-  };
+  const [search, setSearch] = useState("");
 
-  // 2. OPEN EDIT Modal Handler
-  const openEditModal = (project) => {
-    setEditingProject(project);
-    setFormData({
-      name: project.name,
-      key: project.key,
-      lead: project.lead,
-      deadline: project.deadline,
-      status: project.status,
+  const [status, setStatus] = useState("All");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const [deleteId, setDeleteId] = useState(null);
+
+  const perPage = 5;
+
+  // ==========================
+  // Search + Filter
+  // ==========================
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => {
+      const matchSearch =
+        project.name
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        project.key
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchStatus =
+        status === "All" ||
+        project.status === status;
+
+      return matchSearch && matchStatus;
     });
-  };
+  }, [projects, search, status]);
 
-  // 3. UPDATE/EDIT Project Handler
-  const handleUpdateProject = (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.key) return;
+  // ==========================
+  // Pagination
+  // ==========================
 
-    setProjects(
-      projects.map((p) =>
-        p.id === editingProject.id
-          ? {
-              ...p,
-              name: formData.name,
-              key: formData.key.toUpperCase(),
-              lead: formData.lead,
-              deadline: formData.deadline,
-              status: formData.status,
-            }
-          : p
-      )
+  const totalPages = Math.ceil(
+    filteredProjects.length / perPage
+  );
+
+  const displayedProjects =
+    filteredProjects.slice(
+      (currentPage - 1) * perPage,
+      currentPage * perPage
     );
-    setEditingProject(null);
-    setFormData({ name: "", key: "", lead: "", deadline: "", status: "Active" });
+
+  // ==========================
+  // Create Project
+  // ==========================
+
+  const handleCreate = () => {
+    setSelectedProject(null);
+    setOpen(true);
   };
 
-  // 4. DELETE Project Handler
-  const handleDeleteConfirm = () => {
-    if (!projectToDelete) return;
-    setProjects(projects.filter((p) => p.id !== projectToDelete.id));
-    setProjectToDelete(null);
+  // ==========================
+  // Edit Project
+  // ==========================
+
+  const handleEdit = (project) => {
+    setSelectedProject(project);
+    setOpen(true);
   };
 
-  // Filtering Logic (Search Query + Status Dropdown)
-  const filteredProjects = projects.filter((p) => {
-    const matchesSearch = 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.key.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesStatus = statusFilter === "All" || p.status === statusFilter;
+  // ==========================
+  // Open Delete Dialog
+  // ==========================
 
-    return matchesSearch && matchesStatus;
-  });
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
+
+  // ==========================
+  // Confirm Delete
+  // ==========================
+
+  const confirmDelete = () => {
+    setProjects((prev) =>
+      prev.filter((item) => item.id !== deleteId)
+    );
+
+    toast.success("Project Deleted Successfully");
+
+    setDeleteOpen(false);
+
+    setDeleteId(null);
+  };
+
+  // ==========================
+  // Create / Update
+  // ==========================
+
+  const handleSubmit = (data) => {
+    if (selectedProject) {
+      setProjects((prev) =>
+        prev.map((item) =>
+          item.id === selectedProject.id
+            ? {
+                ...item,
+                ...data,
+              }
+            : item
+        )
+      );
+
+      toast.success("Project Updated");
+    } else {
+      const newProject = {
+        id: Date.now(),
+        ...data,
+      };
+
+      setProjects((prev) => [
+        ...prev,
+        newProject,
+      ]);
+
+      toast.success("Project Created");
+    }
+
+    setOpen(false);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header & Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+      {/* Header */}
+
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Projects Management</h1>
-          <p className="text-sm text-slate-500 mt-1">Create, edit, delete, and filter workspace projects.</p>
+
+          <h1 className="text-3xl font-bold text-[#172B4D]">
+            Projects
+          </h1>
+
+          <p className="text-gray-500">
+            Manage all your projects
+          </p>
+
         </div>
+
         <button
-          onClick={() => {
-            setFormData({ name: "", key: "", lead: "", deadline: "", status: "Active" });
-            setIsCreateOpen(true);
-          }}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+          onClick={handleCreate}
+          className="bg-[#0052CC] hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2 transition"
         >
-          <Plus size={18} /> Create Project
+          <Plus size={18} />
+          Create Project
         </button>
+
       </div>
 
-      {/* Search & Status Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-            <Search size={16} />
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search projects by name or key..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
+      {/* Search + Filter */}
+
+      <div className="flex flex-col md:flex-row justify-between gap-4">
+
+        <div className="w-full md:w-80">
+
+          <SearchInput
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
           />
+
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <Filter size={16} /> Status Filter:
-          </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-600 cursor-pointer"
-          >
-            <option value="All">All Status</option>
-            <option value="Active">Active</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-2 rounded-lg">
-            Total: {filteredProjects.length}
-          </span>
-        </div>
+        <select
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="border rounded-lg px-4 py-3 outline-none"
+        >
+          <option>All</option>
+          <option>Planning</option>
+          <option>Active</option>
+          <option>Completed</option>
+        </select>
+
       </div>
 
-      {/* Projects Table Grid */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="p-4">Project Name</th>
-                <th className="p-4">Project Key</th>
-                <th className="p-4">Project Lead</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Deadline</th>
-                <th className="p-4">Issues</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
-              {filteredProjects.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-4 font-semibold text-slate-800 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
-                      {p.key[0]}
-                    </div>
-                    {p.name}
-                  </td>
-                  <td className="p-4">
-                    <span className="font-mono text-xs font-bold px-2 py-1 bg-slate-100 text-slate-700 rounded">
-                      {p.key}
-                    </span>
-                  </td>
-                  <td className="p-4 text-slate-600 font-medium">{p.lead}</td>
-                  <td className="p-4">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      p.status === "Active" ? "bg-blue-50 text-blue-600" :
-                      p.status === "In Progress" ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
-                    }`}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-slate-500 text-xs flex items-center gap-1.5 pt-5">
-                    <Calendar size={14} /> {p.deadline}
-                  </td>
-                  <td className="p-4 font-semibold text-slate-700">{p.issuesCount}</td>
-                  <td className="p-4 text-right space-x-1">
-                    <button 
-                      onClick={() => openEditModal(p)}
-                      className="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                      title="Edit Project"
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => setProjectToDelete(p)}
-                      className="text-slate-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                      title="Delete Project"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Table */}
+
+      <ProjectTable
+        projects={displayedProjects}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
+      {/* Pagination */}
+
+      {totalPages > 1 && (
+
+        <div className="flex justify-center gap-2">
+
+          {[...Array(totalPages)].map((_, index) => (
+
+            <button
+              key={index}
+              onClick={() =>
+                setCurrentPage(index + 1)
+              }
+              className={`w-10 h-10 rounded-lg transition ${
+                currentPage === index + 1
+                  ? "bg-[#0052CC] text-white"
+                  : "border bg-white hover:bg-gray-100"
+              }`}
+            >
+              {index + 1}
+            </button>
+
+          ))}
+
         </div>
-      </div>
 
-      {/* Create Project Modal */}
-      {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl border border-slate-200 overflow-hidden p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-800">Create New Project</h3>
-              <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleCreateProject} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Project Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Enterprise SaaS CRM"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Project Key</label>
-                <input
-                  type="text"
-                  required
-                  maxLength={5}
-                  value={formData.key}
-                  onChange={(e) => setFormData({ ...formData, key: e.target.value })}
-                  placeholder="e.g. CRM"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm uppercase focus:outline-none focus:border-blue-600"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Project Lead</label>
-                <input
-                  type="text"
-                  value={formData.lead}
-                  onChange={(e) => setFormData({ ...formData, lead: e.target.value })}
-                  placeholder="e.g. Admin User"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Target Deadline</label>
-                <input
-                  type="text"
-                  value={formData.deadline}
-                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                  placeholder="e.g. Sep 30, 2026"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
-                >
-                  Save Project
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       )}
 
-      {/* Edit Project Modal */}
-      {editingProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl border border-slate-200 overflow-hidden p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-800">Edit Project</h3>
-              <button onClick={() => setEditingProject(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleUpdateProject} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Project Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
-                />
-              </div>
+      {/* Project Modal */}
 
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Project Key</label>
-                <input
-                  type="text"
-                  required
-                  maxLength={5}
-                  value={formData.key}
-                  onChange={(e) => setFormData({ ...formData, key: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm uppercase focus:outline-none focus:border-blue-600"
-                />
-              </div>
+      <ProjectModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={handleSubmit}
+        project={selectedProject}
+      />
 
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Project Lead</label>
-                <input
-                  type="text"
-                  value={formData.lead}
-                  onChange={(e) => setFormData({ ...formData, lead: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
-                />
-              </div>
+      {/* Delete Confirmation */}
 
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-600"
-                >
-                  <option value="Active">Active</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
+      <ConfirmDialog
+        open={deleteOpen}
+        title="Delete Project"
+        message="This project will be permanently deleted. This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteOpen(false);
+          setDeleteId(null);
+        }}
+      />
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingProject(null)}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
-                >
-                  Update Project
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Box Modal */}
-      {projectToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl border border-slate-200 overflow-hidden p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-red-600">Delete Project</h3>
-              <button onClick={() => setProjectToDelete(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
-                <X size={20} />
-              </button>
-            </div>
-            <p className="text-sm text-slate-600">
-              Are you sure you want to delete <span className="font-semibold text-slate-800">"{projectToDelete.name}"</span>? This will permanently remove all related issues and milestone tracking.
-            </p>
-            <div className="flex justify-end gap-3 pt-3">
-              <button
-                onClick={() => setProjectToDelete(null)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
-              >
-                Confirm Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default ProjectsModule;

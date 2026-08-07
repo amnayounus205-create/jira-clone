@@ -1,22 +1,35 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/layout/Sidebar";
 
-const MainLayout = () => {
-  return (
-    <div className="flex bg-slate-100">
+import { logout } from "../features/auth/authSlice";
 
+const MainLayout = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  return (
+    <div className="flex min-h-screen bg-slate-100">
+
+      {/* Sidebar */}
       <Sidebar />
 
+      {/* Main Content */}
       <div className="flex-1 flex flex-col">
 
-        <Navbar />
+        {/* Navbar */}
+        <Navbar onLogout={handleLogout} />
 
-        <main className="p-6">
-
+        {/* Page Content */}
+        <main className="flex-1 p-6">
           <Outlet />
-
         </main>
 
       </div>
