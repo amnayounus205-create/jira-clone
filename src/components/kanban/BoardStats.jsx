@@ -10,50 +10,48 @@ const StatCard = ({
   title,
   value,
   icon,
-  color,
   bg,
-}) => (
-  <div className="bg-white rounded-xl shadow p-5 hover:shadow-lg transition">
-
-    <div className="flex justify-between items-center">
-
-      <div>
-
-        <p className="text-sm text-gray-500">
+}) => {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center justify-between transition-all duration-200 hover:shadow-md">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-slate-500">
           {title}
         </p>
 
         <h2 className="text-3xl font-bold mt-2 text-[#172B4D]">
           {value}
         </h2>
-
       </div>
 
       <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${bg}`}
+        className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center ${bg}`}
       >
         {icon}
       </div>
-
     </div>
+  );
+};
 
-  </div>
-);
-
-const BoardStats = ({ issues }) => {
-
+const BoardStats = ({ issues = [] }) => {
   const total = issues.length;
 
   const completed = issues.filter(
-    (item) => item.status === "done"
+    (issue) => issue.status === "done"
   ).length;
 
   const inProgress = issues.filter(
-    (item) => item.status === "in-progress"
+    (issue) =>
+      issue.status === "progress" ||
+      issue.status === "in-progress"
   ).length;
 
   const backlog = issues.filter(
-    (item) => item.status === "backlog"
+    (issue) => issue.status === "backlog"
+  ).length;
+
+  const todo = issues.filter(
+    (issue) => issue.status === "todo"
   ).length;
 
   const progress =
@@ -62,33 +60,30 @@ const BoardStats = ({ issues }) => {
       : Math.round((completed / total) * 100);
 
   return (
+    <div className="space-y-5">
+      {/* Statistics */}
 
-    <div className="space-y-6">
-
-      {/* Cards */}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
-
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard
           title="Total Issues"
           value={total}
-          bg="bg-blue-100"
+          bg="bg-blue-50"
           icon={
             <FolderKanban
-              size={28}
+              size={24}
               className="text-blue-600"
             />
           }
         />
 
         <StatCard
-          title="Completed"
-          value={completed}
-          bg="bg-green-100"
+          title="To Do"
+          value={todo}
+          bg="bg-slate-100"
           icon={
-            <CheckCircle2
-              size={28}
-              className="text-green-600"
+            <Clock3
+              size={24}
+              className="text-slate-600"
             />
           }
         />
@@ -96,11 +91,23 @@ const BoardStats = ({ issues }) => {
         <StatCard
           title="In Progress"
           value={inProgress}
-          bg="bg-yellow-100"
+          bg="bg-amber-50"
           icon={
             <Clock3
-              size={28}
-              className="text-yellow-600"
+              size={24}
+              className="text-amber-600"
+            />
+          }
+        />
+
+        <StatCard
+          title="Completed"
+          value={completed}
+          bg="bg-emerald-50"
+          icon={
+            <CheckCircle2
+              size={24}
+              className="text-emerald-600"
             />
           }
         />
@@ -108,60 +115,52 @@ const BoardStats = ({ issues }) => {
         <StatCard
           title="Backlog"
           value={backlog}
-          bg="bg-red-100"
+          bg="bg-red-50"
           icon={
             <AlertTriangle
-              size={28}
+              size={24}
               className="text-red-600"
             />
           }
         />
-
-        <StatCard
-          title="Sprint Progress"
-          value={`${progress}%`}
-          bg="bg-purple-100"
-          icon={
-            <TrendingUp
-              size={28}
-              className="text-purple-600"
-            />
-          }
-        />
-
       </div>
 
-      {/* Progress */}
+      {/* Sprint Progress */}
 
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div>
+            <h3 className="font-bold text-[#172B4D]">
+              Sprint Progress
+            </h3>
 
-        <div className="flex justify-between mb-3">
+            <p className="text-xs text-slate-500 mt-1">
+              {completed} of {total} issues completed
+            </p>
+          </div>
 
-          <h3 className="font-bold text-lg">
-            Sprint Progress
-          </h3>
+          <div className="flex items-center gap-2">
+            <TrendingUp
+              size={18}
+              className="text-[#0052CC]"
+            />
 
-          <span className="font-semibold text-[#0052CC]">
-            {progress}%
-          </span>
-
+            <span className="font-bold text-[#0052CC]">
+              {progress}%
+            </span>
+          </div>
         </div>
 
-        <div className="w-full bg-gray-200 rounded-full h-4">
-
+        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="bg-[#0052CC] h-4 rounded-full transition-all duration-500"
+            className="h-full bg-[#0052CC] rounded-full transition-all duration-500"
             style={{
               width: `${progress}%`,
             }}
           />
-
         </div>
-
       </div>
-
     </div>
-
   );
 };
 

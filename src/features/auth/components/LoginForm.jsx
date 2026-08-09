@@ -45,14 +45,9 @@ const LoginForm = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5"
-    >
-      {/* Email */}
-
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
-        <label className="block mb-2 font-medium">
+        <label className="block mb-2 font-medium text-slate-800 dark:text-slate-200">
           Email
         </label>
 
@@ -60,7 +55,7 @@ const LoginForm = () => {
           type="email"
           placeholder="Enter Email"
           {...register("email")}
-          className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500"
         />
 
         {errors.email && (
@@ -70,29 +65,23 @@ const LoginForm = () => {
         )}
       </div>
 
-      {/* Password */}
-
       <div>
-        <label className="block mb-2 font-medium">
+        <label className="block mb-2 font-medium text-slate-800 dark:text-slate-200">
           Password
         </label>
 
         <div className="relative">
           <input
-            type={
-              showPassword ? "text" : "password"
-            }
+            type={showPassword ? "text" : "password"}
             placeholder="Enter Password"
             {...register("password")}
-            className="w-full border rounded-lg px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 pr-12 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500"
           />
 
           <button
             type="button"
-            onClick={() =>
-              setShowPassword(!showPassword)
-            }
-            className="absolute right-4 top-4"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-4 text-slate-500 dark:text-slate-300"
           >
             {showPassword ? (
               <EyeOff size={18} />
@@ -109,22 +98,15 @@ const LoginForm = () => {
         )}
       </div>
 
-      {/* Remember */}
-
       <div className="flex items-center justify-between">
-
-        <label className="flex items-center gap-2 cursor-pointer">
-
+        <label className="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
           <input
             type="checkbox"
             checked={remember}
-            onChange={(e) =>
-              setRemember(e.target.checked)
-            }
+            onChange={(e) => setRemember(e.target.checked)}
           />
 
           Remember Me
-
         </label>
 
         <Link
@@ -133,70 +115,79 @@ const LoginForm = () => {
         >
           Forgot Password?
         </Link>
-
       </div>
-
-      {/* Login Button */}
 
       <button
         type="submit"
         disabled={isSubmitting}
         className="w-full bg-[#0052CC] hover:bg-blue-700 text-white rounded-lg py-3 font-semibold transition"
       >
-        {isSubmitting
-          ? "Signing In..."
-          : "Login"}
+        {isSubmitting ? "Signing In..." : "Login"}
       </button>
 
-      {/* Demo Accounts */}
-
-      <div className="bg-blue-50 border rounded-lg p-4 text-sm">
-
-        <h3 className="font-bold mb-3">
+      <div className="bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 rounded-lg p-4 text-sm text-slate-800 dark:text-slate-200 transition-colors duration-200">
+        <h3 className="font-bold mb-3 text-slate-900 dark:text-white">
           Demo Accounts
         </h3>
 
         <div className="space-y-2">
-
           <p>
-            <strong>Super Admin</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              Super Admin
+            </strong>
+            <br />
             admin@gmail.com / 123456
           </p>
 
           <p>
-            <strong>Organization Admin</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              Organization Admin
+            </strong>
+            <br />
             org@gmail.com / 123456
           </p>
 
           <p>
-            <strong>Project Manager</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              Project Manager
+            </strong>
+            <br />
             pm@gmail.com / 123456
           </p>
 
           <p>
-            <strong>Scrum Master</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              Scrum Master
+            </strong>
+            <br />
             scrum@gmail.com / 123456
           </p>
 
           <p>
-            <strong>Developer</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              Developer
+            </strong>
+            <br />
             developer@gmail.com / 123456
           </p>
 
           <p>
-            <strong>QA Tester</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              QA Tester
+            </strong>
+            <br />
             qa@gmail.com / 123456
           </p>
 
           <p>
-            <strong>Viewer</strong><br />
+            <strong className="text-slate-900 dark:text-white">
+              Viewer
+            </strong>
+            <br />
             viewer@gmail.com / 123456
           </p>
-
         </div>
-
       </div>
-
     </form>
   );
 };
