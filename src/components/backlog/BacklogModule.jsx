@@ -19,58 +19,15 @@ const initialFilters = {
 };
 
 const BacklogModule = () => {
-  // ==========================
-  // Issues
-  // ==========================
+  const [issues, setIssues] = useState(backlogIssues);
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState(initialFilters);
 
-  const [issues, setIssues] =
-    useState(backlogIssues);
+  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
+  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [deleteIssue, setDeleteIssue] = useState(null);
 
-  // ==========================
-  // Search
-  // ==========================
-
-  const [search, setSearch] =
-    useState("");
-
-  // ==========================
-  // Filters
-  // ==========================
-
-  const [filters, setFilters] =
-    useState(initialFilters);
-
-  // ==========================
-  // Issue Modal
-  // ==========================
-
-  const [
-    isIssueModalOpen,
-    setIsIssueModalOpen,
-  ] = useState(false);
-
-  const [
-    selectedIssue,
-    setSelectedIssue,
-  ] = useState(null);
-
-  // ==========================
-  // Delete Dialog
-  // ==========================
-
-  const [
-    deleteIssue,
-    setDeleteIssue,
-  ] = useState(null);
-
-  // ==========================
-  // Sprint Change
-  // ==========================
-
-  const handleSprintChange = (
-    issueId,
-    newSprint
-  ) => {
+  const handleSprintChange = (issueId, newSprint) => {
     setIssues((prev) =>
       prev.map((issue) =>
         issue.id === issueId
@@ -82,78 +39,53 @@ const BacklogModule = () => {
       )
     );
 
-    toast.success(
-      `Issue moved to ${newSprint}`
-    );
+    toast.success(`Issue moved to ${newSprint}`);
   };
-
-  // ==========================
-  // Create Issue
-  // ==========================
 
   const handleCreateIssue = () => {
     setSelectedIssue(null);
     setIsIssueModalOpen(true);
   };
 
-  // ==========================
-  // Edit Issue
-  // ==========================
-
   const handleEditIssue = (issue) => {
     setSelectedIssue(issue);
     setIsIssueModalOpen(true);
   };
 
-  // ==========================
-  // Delete Issue
-  // ==========================
-
   const handleDeleteIssue = (issue) => {
     setDeleteIssue(issue);
   };
-
-  // ==========================
-  // Confirm Delete
-  // ==========================
 
   const handleConfirmDelete = () => {
     if (!deleteIssue) return;
 
     setIssues((prev) =>
-      prev.filter(
-        (issue) =>
-          issue.id !== deleteIssue.id
-      )
+      prev.filter((issue) => issue.id !== deleteIssue.id)
     );
 
-    toast.success(
-      "Issue deleted successfully"
-    );
-
+    toast.success("Issue deleted successfully");
     setDeleteIssue(null);
   };
 
-  // ==========================
-  // Create / Update Issue
-  // ==========================
-
   const handleIssueSubmit = (data) => {
-    const selectedAssignee =
-      ASSIGNEES.find(
-        (user) =>
-          user.id === data.assignee
-      );
+    const selectedAssignee = ASSIGNEES.find(
+      (user) => user.id === data.assignee
+    );
 
-    const selectedReporter =
-      ASSIGNEES.find(
-        (user) =>
-          user.id === data.reporter
-      );
+    const selectedReporter = ASSIGNEES.find(
+      (user) => user.id === data.reporter
+    );
 
-    // ==========================
-    // Update Existing Issue
-    // ==========================
+    const formattedLabels = data.labels
+      ? data.labels
+          .split(",")
+          .map((label) => label.trim())
+          .filter(Boolean)
+      : [];
+
+    const parsedStoryPoints = data.storyPoints
+      ? Number(data.storyPoints)
+      : null;
 
     if (selectedIssue) {
       setIssues((prev) =>
@@ -161,146 +93,69 @@ const BacklogModule = () => {
           issue.id === selectedIssue.id
             ? {
                 ...issue,
-
                 title: data.title,
-
-                description:
-                  data.description || "",
-
+                description: data.description || "",
                 type: data.type,
-
-                priority:
-                  data.priority,
-
+                priority: data.priority,
                 status: data.status,
-
-                dueDate:
-                  data.dueDate || null,
-
+                dueDate: data.dueDate || null,
                 sprint: data.sprint,
-
-                assignee:
-                  selectedAssignee ||
-                  null,
-
-                reporter:
-                  selectedReporter ||
-                  null,
-
-                labels: data.labels
-                  ? data.labels
-                      .split(",")
-                      .map((label) =>
-                        label.trim()
-                      )
-                      .filter(Boolean)
-                  : [],
-
-                storyPoints:
-                  data.storyPoints
-                    ? Number(
-                        data.storyPoints
-                      )
-                    : null,
-
-                epic:
-                  data.epic || null,
+                assignee: selectedAssignee || null,
+                reporter: selectedReporter || null,
+                labels: formattedLabels,
+                storyPoints: parsedStoryPoints,
+                epic: data.epic || null,
               }
             : issue
         )
       );
 
-      toast.success(
-        "Issue updated successfully"
-      );
-
+      toast.success("Issue updated successfully");
       setSelectedIssue(null);
       setIsIssueModalOpen(false);
-
       return;
     }
 
-    // ==========================
-    // Create New Issue
-    // ==========================
-
     const newIssue = {
       id: `ATL-${Date.now()}`,
-
       title: data.title,
-
-      description:
-        data.description || "",
-
+      description: data.description || "",
       type: data.type,
-
       priority: data.priority,
-
       status: data.status,
-
-      dueDate:
-        data.dueDate || null,
-
+      dueDate: data.dueDate || null,
       sprint: data.sprint,
-
-      assignee:
-        selectedAssignee || null,
-
-      reporter:
-        selectedReporter || null,
-
-      labels: data.labels
-        ? data.labels
-            .split(",")
-            .map((label) =>
-              label.trim()
-            )
-            .filter(Boolean)
-        : [],
-
-      storyPoints:
-        data.storyPoints
-          ? Number(data.storyPoints)
-          : null,
-
+      assignee: selectedAssignee || null,
+      reporter: selectedReporter || null,
+      labels: formattedLabels,
+      storyPoints: parsedStoryPoints,
       epic: data.epic || null,
     };
 
-    setIssues((prev) => [
-      newIssue,
-      ...prev,
-    ]);
-
-    toast.success(
-      "Issue created successfully"
-    );
-
+    setIssues((prev) => [newIssue, ...prev]);
+    toast.success("Issue created successfully");
     setIsIssueModalOpen(false);
   };
 
-  // ==========================
-  // Search + Filters
-  // ==========================
-
   const filteredIssues = useMemo(() => {
-    const normalizedSearch =
-      search.trim().toLowerCase();
+    const normalizedSearch = search.trim().toLowerCase();
 
     return issues.filter((issue) => {
       const matchesSearch =
         !normalizedSearch ||
-        issue.title
-          .toLowerCase()
+        issue.title.toLowerCase().includes(normalizedSearch) ||
+        issue.id.toLowerCase().includes(normalizedSearch) ||
+        issue.description
+          ?.toLowerCase()
           .includes(normalizedSearch) ||
-        issue.id
-          .toLowerCase()
+        issue.assignee?.name
+          ?.toLowerCase()
+          .includes(normalizedSearch) ||
+        issue.reporter?.name
+          ?.toLowerCase()
           .includes(normalizedSearch) ||
         issue.labels?.some((label) =>
-          label
-            .toLowerCase()
-            .includes(
-              normalizedSearch
-            )
+          label.toLowerCase().includes(normalizedSearch)
         );
 
       const matchesType =
@@ -309,23 +164,19 @@ const BacklogModule = () => {
 
       const matchesPriority =
         filters.priority === "All" ||
-        issue.priority ===
-          filters.priority;
+        issue.priority === filters.priority;
 
       const matchesStatus =
         filters.status === "All" ||
-        issue.status ===
-          filters.status;
+        issue.status === filters.status;
 
       const matchesAssignee =
         filters.assignee === "All" ||
-        issue.assignee?.id ===
-          filters.assignee;
+        issue.assignee?.id === filters.assignee;
 
       const matchesSprint =
         filters.sprint === "All" ||
-        issue.sprint ===
-          filters.sprint;
+        issue.sprint === filters.sprint;
 
       return (
         matchesSearch &&
@@ -338,87 +189,66 @@ const BacklogModule = () => {
     });
   }, [issues, search, filters]);
 
-  // ==========================
-  // Render
-  // ==========================
-
   return (
-    <div className="space-y-5">
-
-      {/* ==========================
-          Header
-      ========================== */}
-
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-        <div>
-          <h1 className="text-3xl font-bold text-[#172B4D]">
+    <div className="w-full min-w-0 space-y-5 overflow-x-hidden">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#172B4D] dark:text-white">
             Backlog
           </h1>
 
-          <p className="text-sm text-slate-500 mt-1">
-            Prioritise work and assign
-            issues to sprints.
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Prioritise work and assign issues to sprints.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleCreateIssue}
-          className="w-fit flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0052CC] hover:bg-blue-700 text-white text-sm font-semibold shadow-sm transition"
+          className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-[#0052CC] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:w-auto"
         >
           <Plus size={18} />
-
           Create Issue
         </button>
       </div>
 
-      {/* ==========================
-          Filters
-      ========================== */}
+      <div className="w-full min-w-0">
+        <BacklogFilters
+          search={search}
+          setSearch={setSearch}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      </div>
 
-      <BacklogFilters
-        search={search}
-        setSearch={setSearch}
-        filters={filters}
-        setFilters={setFilters}
-      />
-
-      {/* ==========================
-          Result Count
-      ========================== */}
-
-      <div className="flex items-center justify-between">
-
-        <p className="text-sm text-slate-500">
+      <div className="flex min-w-0 flex-col gap-2 border-b border-slate-200 pb-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Showing{" "}
-          <span className="font-semibold text-slate-700">
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
             {filteredIssues.length}
           </span>{" "}
           of{" "}
-          <span className="font-semibold text-slate-700">
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
             {issues.length}
           </span>{" "}
           issues
         </p>
+
+        {search.trim() && (
+          <p className="max-w-full truncate text-xs text-slate-400">
+            Search: "{search}"
+          </p>
+        )}
       </div>
 
-      {/* ==========================
-          Issues
-      ========================== */}
-
-      <BacklogList
-        issues={filteredIssues}
-        onSprintChange={
-          handleSprintChange
-        }
-        onEdit={handleEditIssue}
-        onDelete={handleDeleteIssue}
-      />
-
-      {/* ==========================
-          Create / Edit Modal
-      ========================== */}
+      <div className="w-full min-w-0 overflow-x-auto">
+        <BacklogList
+          issues={filteredIssues}
+          onSprintChange={handleSprintChange}
+          onEdit={handleEditIssue}
+          onDelete={handleDeleteIssue}
+        />
+      </div>
 
       <IssueModal
         open={isIssueModalOpen}
@@ -430,10 +260,6 @@ const BacklogModule = () => {
         issue={selectedIssue}
       />
 
-      {/* ==========================
-          Delete Confirmation
-      ========================== */}
-
       <ConfirmDialog
         open={Boolean(deleteIssue)}
         title="Delete Issue"
@@ -442,16 +268,11 @@ const BacklogModule = () => {
             ? `Are you sure you want to delete "${deleteIssue.title}"? This action cannot be undone.`
             : ""
         }
-        onConfirm={
-          handleConfirmDelete
-        }
-        onCancel={() =>
-          setDeleteIssue(null)
-        }
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteIssue(null)}
       />
     </div>
   );
 };
 
 export default BacklogModule;
-
