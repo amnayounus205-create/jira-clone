@@ -18,13 +18,25 @@ const Navbar = ({ onLogout }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
+  // ======================================================
+  // DARK MODE
+  // ======================================================
+
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
 
+  // ======================================================
+  // SEARCH STATE
+  // ======================================================
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
+
+  // ======================================================
+  // APPLY DARK MODE
+  // ======================================================
 
   useEffect(() => {
     if (darkMode) {
@@ -36,15 +48,29 @@ const Navbar = ({ onLogout }) => {
     }
   }, [darkMode]);
 
+  // ======================================================
+  // DEBOUNCE SEARCH
+  // ======================================================
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [search]);
 
+  // ======================================================
+  // NORMALIZED SEARCH
+  // ======================================================
+
   const normalizedSearch = debouncedSearch.trim().toLowerCase();
+
+  // ======================================================
+  // SEARCH RESULTS
+  // ======================================================
 
   const searchResults = useMemo(() => {
     if (!normalizedSearch) {
@@ -75,6 +101,10 @@ const Navbar = ({ onLogout }) => {
       .slice(0, 8);
   }, [normalizedSearch]);
 
+  // ======================================================
+  // SEARCH CHANGE
+  // ======================================================
+
   const handleSearchChange = useCallback((event) => {
     const value = event.target.value;
 
@@ -82,11 +112,19 @@ const Navbar = ({ onLogout }) => {
     setShowResults(true);
   }, []);
 
+  // ======================================================
+  // CLEAR SEARCH
+  // ======================================================
+
   const handleSearchClear = useCallback(() => {
     setSearch("");
     setDebouncedSearch("");
     setShowResults(false);
   }, []);
+
+  // ======================================================
+  // ISSUE CLICK
+  // ======================================================
 
   const handleIssueClick = useCallback(
     (issue) => {
@@ -103,10 +141,15 @@ const Navbar = ({ onLogout }) => {
     [navigate]
   );
 
+  // ======================================================
+  // SEARCH KEYBOARD
+  // ======================================================
+
   const handleSearchKeyDown = useCallback(
     (event) => {
       if (event.key === "Escape") {
         handleSearchClear();
+        return;
       }
 
       if (
@@ -123,7 +166,10 @@ const Navbar = ({ onLogout }) => {
     ]
   );
 
-  // Create initials from logged-in user's name
+  // ======================================================
+  // USER INITIALS
+  // ======================================================
+
   const getInitials = (name) => {
     if (!name) {
       return "U";
@@ -140,20 +186,56 @@ const Navbar = ({ onLogout }) => {
 
   const userInitials = getInitials(user?.name);
 
+  // ======================================================
+  // RENDER
+  // ======================================================
+
   return (
-    <div className="flex items-center justify-between gap-3 w-full">
-      {/* Logo */}
-      <div className="flex items-center shrink-0">
-        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+    <div className="flex min-w-0 w-full items-center">
+      {/* ==================================================
+          LOGO
+      ================================================== */}
+
+      <div className="hidden min-w-0 shrink-0 md:block">
+        <h1 className="truncate text-lg font-bold tracking-tight text-slate-800 dark:text-white">
           Jira Clone
-        </h2>
+        </h1>
       </div>
 
-      {/* Right Section */}
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-3">
+      {/* ==================================================
+          RIGHT SECTION
+      ================================================== */}
 
-        {/* Search */}
-        <div className="relative min-w-0 flex-1 sm:flex-none md:block">
+      <div
+        className="
+          ml-auto
+          flex
+          min-w-0
+          max-w-full
+          flex-1
+          items-center
+          justify-end
+          gap-1.5
+
+          sm:gap-2
+          md:gap-3
+        "
+      >
+        {/* ==================================================
+            SEARCH
+        ================================================== */}
+
+        <div
+          className="
+            relative
+            min-w-0
+            flex-1
+
+            sm:max-w-[280px]
+            md:max-w-[320px]
+            lg:max-w-[380px]
+          "
+        >
           <Search
             size={17}
             className="
@@ -161,8 +243,9 @@ const Navbar = ({ onLogout }) => {
               absolute
               left-3
               top-1/2
+              z-10
               -translate-y-1/2
-              text-gray-400
+              text-slate-400
               dark:text-slate-500
             "
           />
@@ -181,6 +264,7 @@ const Navbar = ({ onLogout }) => {
             className="
               h-10
               w-full
+              min-w-0
               rounded-lg
               border
               border-slate-200
@@ -191,16 +275,23 @@ const Navbar = ({ onLogout }) => {
               text-slate-800
               outline-none
               transition-colors
+
+              placeholder:text-slate-400
+
               focus:border-blue-500
+              focus:ring-2
+              focus:ring-blue-500/10
+
               dark:border-slate-700
               dark:bg-slate-800
               dark:text-slate-200
               dark:placeholder:text-slate-500
-              sm:w-56
-              md:w-72
+
+              sm:w-full
             "
           />
 
+          {/* Clear Search */}
           {search && (
             <button
               type="button"
@@ -209,21 +300,31 @@ const Navbar = ({ onLogout }) => {
                 absolute
                 right-2
                 top-1/2
+                z-10
                 -translate-y-1/2
                 rounded
                 p-1
                 text-slate-400
+                transition
+                hover:bg-slate-100
                 hover:text-slate-700
+                dark:hover:bg-slate-700
                 dark:hover:text-slate-200
               "
+              aria-label="Clear search"
             >
               <X size={15} />
             </button>
           )}
 
-          {/* Search Results */}
+          {/* ==================================================
+              SEARCH RESULTS
+          ================================================== */}
+
           {showResults && search.trim() && (
             <>
+              {/* Search Overlay */}
+
               <button
                 type="button"
                 aria-label="Close search results"
@@ -231,32 +332,52 @@ const Navbar = ({ onLogout }) => {
                 className="
                   fixed
                   inset-0
-                  z-40
+                  z-[60]
                   cursor-default
                   bg-transparent
                 "
               />
 
+              {/* Dropdown */}
+
               <div
                 className="
                   absolute
+                  left-0
                   right-0
                   top-full
-                  z-50
+                  z-[70]
                   mt-2
-                  w-[calc(100vw-24px)]
-                  max-w-[380px]
+                  max-h-[70vh]
+                  min-w-0
                   overflow-hidden
                   rounded-xl
                   border
                   border-slate-200
                   bg-white
-                  shadow-xl
+                  shadow-2xl
+
                   dark:border-slate-700
                   dark:bg-slate-900
+
+                  sm:left-auto
+                  sm:right-0
+                  sm:w-[360px]
+                  md:w-[380px]
                 "
               >
-                <div className="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                {/* Search Header */}
+
+                <div
+                  className="
+                    border-b
+                    border-slate-100
+                    px-4
+                    py-3
+
+                    dark:border-slate-800
+                  "
+                >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                     Global Search
                   </p>
@@ -272,8 +393,12 @@ const Navbar = ({ onLogout }) => {
                   </p>
                 </div>
 
+                {/* ==================================================
+                    RESULTS
+                ================================================== */}
+
                 {searchResults.length > 0 ? (
-                  <div className="max-h-[60vh] overflow-y-auto">
+                  <div className="max-h-[55vh] overflow-y-auto">
                     {searchResults.map((issue) => (
                       <button
                         key={issue.id}
@@ -289,49 +414,116 @@ const Navbar = ({ onLogout }) => {
                           py-3
                           text-left
                           transition
+
                           hover:bg-slate-50
+
                           dark:border-slate-800
                           dark:hover:bg-slate-800
                         "
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950">
+                        <div className="flex min-w-0 items-start gap-3">
+                          {/* Issue Icon */}
+
+                          <div
+                            className="
+                              flex
+                              h-8
+                              w-8
+                              shrink-0
+                              items-center
+                              justify-center
+                              rounded-lg
+                              bg-blue-50
+                              text-blue-600
+
+                              dark:bg-blue-950
+                              dark:text-blue-400
+                            "
+                          >
                             <FileText size={15} />
                           </div>
 
+                          {/* Issue Content */}
+
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-blue-600">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <span className="shrink-0 text-[10px] font-bold text-blue-600">
                                 {issue.id}
                               </span>
 
-                              <span className="text-[10px] text-slate-400">
+                              <span className="truncate text-[10px] text-slate-400">
                                 {issue.type}
                               </span>
                             </div>
 
-                            <p className="mt-0.5 truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                            <p
+                              className="
+                                mt-0.5
+                                truncate
+                                text-sm
+                                font-semibold
+                                text-slate-800
+
+                                dark:text-slate-100
+                              "
+                            >
                               {issue.title}
                             </p>
 
-                            <p className="mt-1 truncate text-[11px] text-slate-400 dark:text-slate-500">
+                            <p
+                              className="
+                                mt-1
+                                truncate
+                                text-[11px]
+                                text-slate-400
+
+                                dark:text-slate-500
+                              "
+                            >
                               {issue.description}
                             </p>
 
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
+                              {/* Status */}
+
+                              <span
+                                className="
+                                  max-w-[100px]
+                                  truncate
+                                  rounded-full
+                                  bg-slate-100
+                                  px-2
+                                  py-0.5
+                                  text-[9px]
+                                  font-semibold
+                                  text-slate-600
+
+                                  dark:bg-slate-800
+                                  dark:text-slate-300
+                                "
+                              >
                                 {issue.status}
                               </span>
 
+                              {/* Assignee */}
+
                               {issue.assignee?.name && (
-                                <span className="flex items-center gap-1 text-[9px] text-slate-400">
-                                  <User size={10} />
-                                  {issue.assignee.name}
+                                <span className="flex max-w-[120px] min-w-0 items-center gap-1 truncate text-[9px] text-slate-400">
+                                  <User
+                                    size={10}
+                                    className="shrink-0"
+                                  />
+
+                                  <span className="truncate">
+                                    {issue.assignee.name}
+                                  </span>
                                 </span>
                               )}
 
+                              {/* Label */}
+
                               {issue.labels?.length > 0 && (
-                                <span className="text-[9px] text-slate-400">
+                                <span className="max-w-[100px] truncate text-[9px] text-slate-400">
                                   #{issue.labels[0]}
                                 </span>
                               )}
@@ -342,26 +534,61 @@ const Navbar = ({ onLogout }) => {
                     ))}
                   </div>
                 ) : (
+                  /* ==================================================
+                      NO RESULTS
+                  ================================================== */
+
                   <div className="px-5 py-8 text-center">
                     <Search
                       size={25}
-                      className="mx-auto text-slate-300 dark:text-slate-600"
+                      className="
+                        mx-auto
+                        text-slate-300
+
+                        dark:text-slate-600
+                      "
                     />
 
-                    <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                    <p
+                      className="
+                        mt-2
+                        text-sm
+                        font-semibold
+                        text-slate-600
+
+                        dark:text-slate-300
+                      "
+                    >
                       No issues found
                     </p>
 
                     <p className="mt-1 text-xs text-slate-400">
-                      Try an issue ID, title, name, status or label.
+                      Try an issue ID, title, name,
+                      status or label.
                     </p>
                   </div>
                 )}
 
-                <div className="border-t border-slate-100 bg-slate-50 px-4 py-2 dark:border-slate-800 dark:bg-slate-950">
+                {/* ==================================================
+                    SEARCH FOOTER
+                ================================================== */}
+
+                <div
+                  className="
+                    border-t
+                    border-slate-100
+                    bg-slate-50
+                    px-4
+                    py-2
+
+                    dark:border-slate-800
+                    dark:bg-slate-950
+                  "
+                >
                   <p className="text-[9px] text-slate-400">
-                    Search by ID, title, description, assignee,
-                    reporter, label, status, priority or sprint
+                    Search by ID, title, description,
+                    assignee, reporter, label, status,
+                    priority or sprint
                   </p>
                 </div>
               </div>
@@ -369,7 +596,10 @@ const Navbar = ({ onLogout }) => {
           )}
         </div>
 
-        {/* Notifications */}
+        {/* ==================================================
+            NOTIFICATIONS
+        ================================================== */}
+
         <button
           type="button"
           className="
@@ -381,26 +611,47 @@ const Navbar = ({ onLogout }) => {
             items-center
             justify-center
             rounded-lg
-            text-gray-600
+            text-slate-600
             transition
+
             hover:bg-slate-100
+
             dark:text-slate-300
             dark:hover:bg-slate-800
           "
           title="Notifications"
+          aria-label="Notifications"
         >
           <Bell size={19} />
 
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
+          <span
+            className="
+              absolute
+              right-1.5
+              top-1.5
+              h-2
+              w-2
+              rounded-full
+              bg-red-500
+            "
+          />
         </button>
 
-        {/* Dark Mode */}
+        {/* ==================================================
+            DARK MODE
+        ================================================== */}
+
         <button
           type="button"
           onClick={() =>
             setDarkMode((prev) => !prev)
           }
           title={
+            darkMode
+              ? "Switch to light mode"
+              : "Switch to dark mode"
+          }
+          aria-label={
             darkMode
               ? "Switch to light mode"
               : "Switch to dark mode"
@@ -418,7 +669,9 @@ const Navbar = ({ onLogout }) => {
             bg-white
             text-slate-600
             transition
+
             hover:bg-slate-100
+
             dark:border-slate-700
             dark:bg-slate-800
             dark:text-yellow-400
@@ -432,18 +685,24 @@ const Navbar = ({ onLogout }) => {
           )}
         </button>
 
-        {/* User Information */}
-        <div className="hidden text-right sm:block">
-          <h3 className="max-w-[130px] truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+        {/* ==================================================
+            USER INFO
+        ================================================== */}
+
+        <div className="hidden min-w-0 max-w-[130px] text-right sm:block">
+          <h3 className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
             {user?.name || "Admin"}
           </h3>
 
-          <p className="max-w-[130px] truncate text-xs text-gray-500 dark:text-slate-400">
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
             {user?.role || "Super Admin"}
           </p>
         </div>
 
-        {/* User Initial Avatar */}
+        {/* ==================================================
+            USER AVATAR
+        ================================================== */}
+
         <div
           className="
             flex
@@ -459,7 +718,9 @@ const Navbar = ({ onLogout }) => {
             text-white
             ring-2
             ring-slate-200
+
             dark:ring-slate-700
+
             sm:h-10
             sm:w-10
           "
@@ -468,30 +729,38 @@ const Navbar = ({ onLogout }) => {
           {userInitials}
         </div>
 
-        {/* Logout */}
+        {/* ==================================================
+            LOGOUT
+        ================================================== */}
+
         <button
           type="button"
           onClick={onLogout}
           className="
             flex
             h-10
+            w-10
             shrink-0
             items-center
             justify-center
-            gap-2
             rounded-lg
             bg-red-500
-            px-3
-            py-2
             text-white
             transition
+
             hover:bg-red-600
-            sm:px-4
+
+            sm:w-auto
+            sm:gap-2
+            sm:px-3
+            lg:px-4
           "
+          title="Logout"
+          aria-label="Logout"
         >
           <LogOut size={17} />
 
-          <span className="hidden lg:inline">
+          <span className="hidden sm:inline">
             Logout
           </span>
         </button>

@@ -13,32 +13,54 @@ const MainLayout = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // ======================================================
+  // LOGOUT
+  // ======================================================
+
   const handleLogout = useCallback(() => {
     dispatch(logout());
     setSidebarOpen(false);
-    navigate("/login", { replace: true });
+
+    navigate("/login", {
+      replace: true,
+    });
   }, [dispatch, navigate]);
+
+  // ======================================================
+  // CLOSE SIDEBAR
+  // ======================================================
 
   const handleCloseSidebar = useCallback(() => {
     setSidebarOpen(false);
   }, []);
 
+  // ======================================================
+  // TOGGLE SIDEBAR
+  // ======================================================
+
   const handleToggleSidebar = useCallback(() => {
     setSidebarOpen((prev) => !prev);
   }, []);
 
+  // ======================================================
+  // RENDER
+  // ======================================================
+
   return (
-    <div className="flex min-h-screen min-w-0 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      {/* =========================================================
+    <div className="flex min-h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* ==================================================
           SIDEBAR
-      ========================================================= */}
+      ================================================== */}
 
       <Sidebar
-        open={sidebarOpen}
+        isOpen={sidebarOpen}
         onClose={handleCloseSidebar}
       />
 
-      {/* Mobile Sidebar Overlay */}
+      {/* ==================================================
+          MOBILE OVERLAY
+      ================================================== */}
+
       {sidebarOpen && (
         <button
           type="button"
@@ -55,14 +77,14 @@ const MainLayout = () => {
         />
       )}
 
-      {/* =========================================================
-          MAIN AREA
-      ========================================================= */}
+      {/* ==================================================
+          MAIN CONTENT AREA
+      ================================================== */}
 
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-slate-50 dark:bg-slate-950">
-        {/* =======================================================
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* ==================================================
             HEADER
-        ======================================================= */}
+        ================================================== */}
 
         <header
           className="
@@ -74,13 +96,18 @@ const MainLayout = () => {
             border-slate-200
             bg-white
             px-3
+
             dark:border-slate-800
             dark:bg-slate-900
+
             sm:px-4
             lg:px-6
           "
         >
-          {/* Mobile Sidebar Button */}
+          {/* ==================================================
+              MOBILE MENU BUTTON
+          ================================================== */}
+
           <button
             type="button"
             onClick={handleToggleSidebar}
@@ -95,9 +122,12 @@ const MainLayout = () => {
               rounded-lg
               text-slate-600
               transition
+
               hover:bg-slate-100
+
               dark:text-slate-300
               dark:hover:bg-slate-800
+
               lg:hidden
             "
             aria-label={
@@ -113,15 +143,18 @@ const MainLayout = () => {
             )}
           </button>
 
-          {/* Navbar */}
+          {/* ==================================================
+              NAVBAR
+          ================================================== */}
+
           <div className="min-w-0 flex-1">
             <Navbar onLogout={handleLogout} />
           </div>
         </header>
 
-        {/* =======================================================
+        {/* ==================================================
             PAGE CONTENT
-        ======================================================= */}
+        ================================================== */}
 
         <main
           className="
@@ -139,6 +172,7 @@ const MainLayout = () => {
               bg-slate-50
               p-3
               dark:bg-slate-950
+
               sm:p-4
               md:p-5
               lg:p-6
