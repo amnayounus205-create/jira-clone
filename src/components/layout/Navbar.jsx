@@ -123,13 +123,36 @@ const Navbar = ({ onLogout }) => {
     ]
   );
 
-  return (
-    <div className="flex w-full min-w-0 items-center justify-between gap-2">
-      <h1 className="hidden shrink-0 text-lg font-bold text-blue-600 sm:block">
-        Jira Clone
-      </h1>
+  // Create initials from logged-in user's name
+  const getInitials = (name) => {
+    if (!name) {
+      return "U";
+    }
 
+    return name
+      .trim()
+      .split(/\s+/)
+      .map((part) => part.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
+  const userInitials = getInitials(user?.name);
+
+  return (
+    <div className="flex items-center justify-between gap-3 w-full">
+      {/* Logo */}
+      <div className="flex items-center shrink-0">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+          Jira Clone
+        </h2>
+      </div>
+
+      {/* Right Section */}
       <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-3">
+
+        {/* Search */}
         <div className="relative min-w-0 flex-1 sm:flex-none md:block">
           <Search
             size={17}
@@ -198,13 +221,20 @@ const Navbar = ({ onLogout }) => {
             </button>
           )}
 
+          {/* Search Results */}
           {showResults && search.trim() && (
             <>
               <button
                 type="button"
                 aria-label="Close search results"
                 onClick={() => setShowResults(false)}
-                className="fixed inset-0 z-40 cursor-default bg-transparent"
+                className="
+                  fixed
+                  inset-0
+                  z-40
+                  cursor-default
+                  bg-transparent
+                "
               />
 
               <div
@@ -339,6 +369,7 @@ const Navbar = ({ onLogout }) => {
           )}
         </div>
 
+        {/* Notifications */}
         <button
           type="button"
           className="
@@ -363,6 +394,7 @@ const Navbar = ({ onLogout }) => {
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
         </button>
 
+        {/* Dark Mode */}
         <button
           type="button"
           onClick={() =>
@@ -400,6 +432,7 @@ const Navbar = ({ onLogout }) => {
           )}
         </button>
 
+        {/* User Information */}
         <div className="hidden text-right sm:block">
           <h3 className="max-w-[130px] truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
             {user?.name || "Admin"}
@@ -410,23 +443,32 @@ const Navbar = ({ onLogout }) => {
           </p>
         </div>
 
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="avatar"
+        {/* User Initial Avatar */}
+        <div
           className="
+            flex
             h-9
             w-9
             shrink-0
+            items-center
+            justify-center
             rounded-full
-            object-cover
+            bg-blue-600
+            text-xs
+            font-bold
+            text-white
             ring-2
             ring-slate-200
             dark:ring-slate-700
             sm:h-10
             sm:w-10
           "
-        />
+          title={user?.name || "User"}
+        >
+          {userInitials}
+        </div>
 
+        {/* Logout */}
         <button
           type="button"
           onClick={onLogout}
