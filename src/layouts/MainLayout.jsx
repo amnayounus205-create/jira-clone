@@ -28,27 +28,78 @@ const MainLayout = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen min-w-0 bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-screen min-w-0 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      {/* =========================================================
+          SIDEBAR
+      ========================================================= */}
+
       <Sidebar
-        isOpen={sidebarOpen}
+        open={sidebarOpen}
         onClose={handleCloseSidebar}
       />
 
+      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <button
           type="button"
           aria-label="Close sidebar"
           onClick={handleCloseSidebar}
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="
+            fixed
+            inset-0
+            z-40
+            bg-black/50
+            backdrop-blur-[1px]
+            lg:hidden
+          "
         />
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center border-b border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900 sm:px-4 lg:px-6">
+      {/* =========================================================
+          MAIN AREA
+      ========================================================= */}
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-slate-50 dark:bg-slate-950">
+        {/* =======================================================
+            HEADER
+        ======================================================= */}
+
+        <header
+          className="
+            flex
+            h-16
+            shrink-0
+            items-center
+            border-b
+            border-slate-200
+            bg-white
+            px-3
+            dark:border-slate-800
+            dark:bg-slate-900
+            sm:px-4
+            lg:px-6
+          "
+        >
+          {/* Mobile Sidebar Button */}
           <button
             type="button"
             onClick={handleToggleSidebar}
-            className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
+            className="
+              mr-3
+              flex
+              h-10
+              w-10
+              shrink-0
+              items-center
+              justify-center
+              rounded-lg
+              text-slate-600
+              transition
+              hover:bg-slate-100
+              dark:text-slate-300
+              dark:hover:bg-slate-800
+              lg:hidden
+            "
             aria-label={
               sidebarOpen
                 ? "Close sidebar"
@@ -62,13 +113,37 @@ const MainLayout = () => {
             )}
           </button>
 
+          {/* Navbar */}
           <div className="min-w-0 flex-1">
             <Navbar onLogout={handleLogout} />
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
-          <div className="min-h-full min-w-0 bg-slate-50 p-3 dark:bg-slate-950 sm:p-4 md:p-5 lg:p-6">
+        {/* =======================================================
+            PAGE CONTENT
+        ======================================================= */}
+
+        <main
+          className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            bg-slate-50
+            dark:bg-slate-950
+          "
+        >
+          <div
+            className="
+              min-h-full
+              min-w-0
+              bg-slate-50
+              p-3
+              dark:bg-slate-950
+              sm:p-4
+              md:p-5
+              lg:p-6
+            "
+          >
             <Outlet />
           </div>
         </main>
