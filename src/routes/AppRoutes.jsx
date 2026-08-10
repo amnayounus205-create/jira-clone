@@ -1,8 +1,4 @@
-import {
-  lazy,
-  Suspense,
-} from "react";
-
+import { lazy, Suspense } from "react";
 import {
   Routes,
   Route,
@@ -11,6 +7,7 @@ import {
 
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../features/auth/components/ProtectedRoute";
+import { ROLES } from "../constants/roles";
 
 const Dashboard = lazy(
   () => import("../components/dashboard/Dashboard")
@@ -80,16 +77,15 @@ const ForgotPasswordPage = lazy(
   () => import("../features/auth/pages/ForgotPasswordPage")
 );
 
-const LoadingScreen = () => (
-  <div className="min-h-[60vh] flex items-center justify-center">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-      <p className="text-sm text-slate-500">
+const LoadingScreen = () => {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
         Loading...
       </p>
     </div>
-  </div>
-);
+  );
+};
 
 const AppRoutes = () => {
   return (
@@ -178,8 +174,8 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute
                 allowedRoles={[
-                  "Super Admin",
-                  "Organization Admin",
+                  ROLES.SUPER_ADMIN,
+                  ROLES.ORG_ADMIN,
                 ]}
               >
                 <OrganizationsModule />
@@ -192,8 +188,8 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute
                 allowedRoles={[
-                  "Super Admin",
-                  "Organization Admin",
+                  ROLES.SUPER_ADMIN,
+                  ROLES.ORG_ADMIN,
                 ]}
               >
                 <OrganizationDetails />
@@ -206,9 +202,12 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute
                 allowedRoles={[
-                  "Super Admin",
-                  "Project Manager",
-                  "Scrum Master",
+                  ROLES.SUPER_ADMIN,
+                  ROLES.ORG_ADMIN,
+                  ROLES.PROJECT_MANAGER,
+                  ROLES.SCRUM_MASTER,
+                  ROLES.QA_TESTER,
+                  ROLES.VIEWER,
                 ]}
               >
                 <ReportsModule />
@@ -221,9 +220,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute
                 allowedRoles={[
-                  "Super Admin",
-                  "Organization Admin",
-                  "Project Manager",
+                  ROLES.SUPER_ADMIN,
+                  ROLES.ORG_ADMIN,
+                  ROLES.PROJECT_MANAGER,
                 ]}
               >
                 <TeamsModule />
@@ -236,7 +235,7 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute
                 allowedRoles={[
-                  "Super Admin",
+                  ROLES.SUPER_ADMIN,
                 ]}
               >
                 <SettingsModule />
@@ -249,7 +248,7 @@ const AppRoutes = () => {
           path="*"
           element={
             <Navigate
-              to="/"
+              to="/dashboard"
               replace
             />
           }

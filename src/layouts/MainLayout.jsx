@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 
 import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/layout/Sidebar";
-
 import { logout } from "../features/auth/authSlice";
 
 const MainLayout = () => {
@@ -16,8 +15,8 @@ const MainLayout = () => {
 
   const handleLogout = useCallback(() => {
     dispatch(logout());
-    navigate("/login");
     setSidebarOpen(false);
+    navigate("/login", { replace: true });
   }, [dispatch, navigate]);
 
   const handleCloseSidebar = useCallback(() => {
@@ -29,7 +28,7 @@ const MainLayout = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-screen min-w-0 bg-slate-50 dark:bg-slate-950">
       <Sidebar
         isOpen={sidebarOpen}
         onClose={handleCloseSidebar}
@@ -49,8 +48,12 @@ const MainLayout = () => {
           <button
             type="button"
             onClick={handleToggleSidebar}
-            className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
-            aria-label="Toggle sidebar"
+            className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
+            aria-label={
+              sidebarOpen
+                ? "Close sidebar"
+                : "Open sidebar"
+            }
           >
             {sidebarOpen ? (
               <X size={21} />
@@ -65,7 +68,7 @@ const MainLayout = () => {
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
-          <div className="min-h-full bg-slate-50 p-3 dark:bg-slate-950 sm:p-4 md:p-5 lg:p-6">
+          <div className="min-h-full min-w-0 bg-slate-50 p-3 dark:bg-slate-950 sm:p-4 md:p-5 lg:p-6">
             <Outlet />
           </div>
         </main>

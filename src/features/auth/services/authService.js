@@ -13,7 +13,7 @@ const users = [
     name: "Ali Khan",
     email: "org@gmail.com",
     password: "123456",
-    role: ROLES.ORGANIZATION_ADMIN,
+    role: ROLES.ORG_ADMIN,
   },
   {
     id: 3,
@@ -86,11 +86,15 @@ export const loginUser = async ({
       "auth",
       JSON.stringify(authData)
     );
+
+    sessionStorage.removeItem("auth");
   } else {
     sessionStorage.setItem(
       "auth",
       JSON.stringify(authData)
     );
+
+    localStorage.removeItem("auth");
   }
 
   return authData;

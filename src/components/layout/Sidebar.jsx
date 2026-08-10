@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
+
 import useAuth from "../../features/auth/hooks/useAuth";
+import { ROLES } from "../../constants/roles";
 
 const menuConfig = {
-  "Super Admin": [
+  [ROLES.SUPER_ADMIN]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Organizations", path: "/organizations", icon: Building },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
@@ -32,17 +34,16 @@ const menuConfig = {
     { name: "Settings", path: "/settings", icon: Settings },
   ],
 
-  "Organization Admin": [
+  [ROLES.ORG_ADMIN]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Organizations", path: "/organizations", icon: Building },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
     { name: "Projects", path: "/projects", icon: FolderKanban },
     { name: "Teams", path: "/teams", icon: Users },
     { name: "Reports", path: "/reports", icon: BarChart3 },
-    { name: "Settings", path: "/settings", icon: Settings },
   ],
 
-  "Project Manager": [
+  [ROLES.PROJECT_MANAGER]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
     { name: "Projects", path: "/projects", icon: FolderKanban },
@@ -53,7 +54,7 @@ const menuConfig = {
     { name: "Reports", path: "/reports", icon: BarChart3 },
   ],
 
-  "Scrum Master": [
+  [ROLES.SCRUM_MASTER]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
     { name: "Board", path: "/boards", icon: Kanban },
@@ -62,7 +63,7 @@ const menuConfig = {
     { name: "Calendar", path: "/calendar", icon: Calendar },
   ],
 
-  Developer: [
+  [ROLES.DEVELOPER]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
     { name: "Board", path: "/boards", icon: Kanban },
@@ -70,7 +71,7 @@ const menuConfig = {
     { name: "Calendar", path: "/calendar", icon: Calendar },
   ],
 
-  "QA Tester": [
+  [ROLES.QA_TESTER]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
     { name: "Board", path: "/boards", icon: Kanban },
@@ -78,7 +79,7 @@ const menuConfig = {
     { name: "Reports", path: "/reports", icon: BarChart3 },
   ],
 
-  Viewer: [
+  [ROLES.VIEWER]: [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Workspaces", path: "/workspaces", icon: LayoutGrid },
     { name: "Projects", path: "/projects", icon: FolderKanban },
@@ -86,10 +87,19 @@ const menuConfig = {
   ],
 };
 
+const normalizeRole = (role) => {
+  if (!role) return ROLES.VIEWER;
+
+  return String(role)
+    .trim()
+    .replace(/\s+/g, " ");
+};
+
 const Sidebar = ({ isOpen, onClose }) => {
   const { role } = useAuth();
 
-  const menus = menuConfig[role] || menuConfig.Viewer;
+  const normalizedRole = normalizeRole(role);
+  const menus = menuConfig[normalizedRole] || menuConfig[ROLES.VIEWER];
 
   return (
     <aside
@@ -113,9 +123,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >
-      <div className="shrink-0 border-b border-slate-200 px-4 py-5 dark:border-slate-800">
+      <div className="shrink-0 border-b border-slate-200 px-5 py-5 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0052CC] text-sm font-bold text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0052CC] text-sm font-bold text-white">
             J
           </div>
 
@@ -136,7 +146,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </p>
 
           <p className="mt-1 truncate text-xs font-semibold text-slate-700 dark:text-slate-200">
-            {role || "Viewer"}
+            {normalizedRole}
           </p>
         </div>
       </div>
@@ -151,8 +161,17 @@ const Sidebar = ({ isOpen, onClose }) => {
               to={item.path}
               onClick={onClose}
               className={({ isActive }) => `
-                group flex items-center gap-3 rounded-lg px-3 py-2.5
-                text-sm font-medium transition-all duration-200
+                group
+                flex
+                items-center
+                gap-3
+                rounded-lg
+                px-3
+                py-2.5
+                text-sm
+                font-medium
+                transition-all
+                duration-200
                 ${
                   isActive
                     ? "bg-[#0052CC] text-white shadow-sm"

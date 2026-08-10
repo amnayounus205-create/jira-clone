@@ -1,12 +1,35 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const savedUser = JSON.parse(localStorage.getItem("user"));
-const savedToken = localStorage.getItem("token");
+const getStoredAuth = () => {
+  try {
+    const localAuth = localStorage.getItem("auth");
+
+    if (localAuth) {
+      return JSON.parse(localAuth);
+    }
+
+    const sessionAuth =
+      sessionStorage.getItem("auth");
+
+    if (sessionAuth) {
+      return JSON.parse(sessionAuth);
+    }
+  } catch (error) {
+    console.error(
+      "Failed to read stored auth:",
+      error
+    );
+  }
+
+  return null;
+};
+
+const savedAuth = getStoredAuth();
 
 const initialState = {
-  user: savedUser || null,
-  token: savedToken || null,
-  isAuthenticated: !!savedToken,
+  user: savedAuth?.user || null,
+  token: savedAuth?.token || null,
+  isAuthenticated: Boolean(savedAuth?.token),
 };
 
 const authSlice = createSlice({
@@ -16,20 +39,11 @@ const authSlice = createSlice({
 
   reducers: {
     loginSuccess: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.isAuthenticated = true;
+      const { user, token } = action.payload;
 
-      // Save Login
-      localStorage.setItem(
-        "user",
-        JSON.stringify(action.payload.user)
-      );
-
-      localStorage.setItem(
-        "token",
-        action.payload.token
-      );
+      state.user = user;
+      state.token = token;
+      state.isAuthenticated = Boolean(token);
     },
 
     logout: (state) => {
@@ -37,14 +51,20 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
 
-      // Clear Login
+      // Clear current auth storage
+      localStorage.removeItem("auth");
+      sessionStorage.removeItem("auth");
+
+      // Clear old auth storage
       localStorage.removeItem("user");
       localStorage.removeItem("token");
     },
   },
 });
 
-export const { loginSuccess, logout } =
-  authSlice.actions;
+export const {
+  loginSuccess,
+  logout,
+} = authSlice.actions;
 
 export default authSlice.reducer;

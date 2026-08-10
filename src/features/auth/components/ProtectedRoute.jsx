@@ -1,22 +1,49 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+
+const normalizeRole = (role) => {
+  return String(role || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+};
 
 const ProtectedRoute = ({
   children,
-  allowedRoles,
+  allowedRoles = [],
 }) => {
-
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role, user } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
-  if (
-    allowedRoles &&
-    !allowedRoles.includes(role)
-  ) {
-    return <Navigate to="/dashboard" replace />;
+  if (!allowedRoles || allowedRoles.length === 0) {
+    return children;
+  }
+
+  const currentRole = normalizeRole(
+    user?.role || role
+  );
+
+  const normalizedAllowedRoles = allowedRoles.map(
+    (allowedRole) => normalizeRole(allowedRole)
+  );
+
+  if (!normalizedAllowedRoles.includes(currentRole)) {
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
   }
 
   return children;

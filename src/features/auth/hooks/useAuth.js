@@ -1,22 +1,63 @@
 import { useSelector } from "react-redux";
 
+const normalizeRole = (role) => {
+  if (!role) return null;
+
+  return String(role)
+    .trim()
+    .replace(/\s+/g, " ");
+};
+
+const readStoredAuth = () => {
+  try {
+    const localAuth = localStorage.getItem("auth");
+
+    if (localAuth) {
+      const parsed = JSON.parse(localAuth);
+
+      if (parsed?.token && parsed?.user) {
+        return parsed;
+      }
+    }
+
+    const sessionAuth = sessionStorage.getItem("auth");
+
+    if (sessionAuth) {
+      const parsed = JSON.parse(sessionAuth);
+
+      if (parsed?.token && parsed?.user) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.error("Unable to read stored authentication:", error);
+  }
+
+  return null;
+};
+
 const useAuth = () => {
   const auth = useSelector((state) => state.auth);
 
-  let storageAuth = null;
+  const storedAuth = readStoredAuth();
 
-  if (!auth.isAuthenticated) {
-    storageAuth =
-      JSON.parse(localStorage.getItem("auth")) ||
-      JSON.parse(sessionStorage.getItem("auth"));
-  }
+  /*
+   * Redux is the primary source.
+   * Storage is only used after a page refresh.
+   */
+  const user = auth.user || storedAuth?.user || null;
+
+  const token = auth.token || storedAuth?.token || null;
+
+  const role = normalizeRole(user?.role);
+
+  const isAuthenticated = Boolean(user && token);
 
   return {
-    user: auth.user || storageAuth?.user,
-    token: auth.token || storageAuth?.token,
-    role: auth.user?.role || storageAuth?.user?.role,
-    isAuthenticated:
-      auth.isAuthenticated || !!storageAuth,
+    user,
+    token,
+    role,
+    isAuthenticated,
   };
 };
 
