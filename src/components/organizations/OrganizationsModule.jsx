@@ -374,10 +374,6 @@ const OrganizationsModule = () => {
         organization={selectedOrganization}
       />
 
-      {/* ==================================================
-          DELETE CONFIRMATION
-      ================================================== */}
-
       <ConfirmDialog
         open={deleteDialog}
         title="Delete Organization"
