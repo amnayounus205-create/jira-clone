@@ -57,6 +57,7 @@ import toast from "react-hot-toast";
 */
 
 const STORAGE_KEY = "jira_clone_settings";
+const THEME_STORAGE_KEY = "theme";
 
 /* =========================================================================
    CONSTANTS
@@ -236,8 +237,17 @@ const readSettings = () => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
 
+    const globalTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
     if (!saved) {
-      return DEFAULT_SETTINGS;
+      return {
+        ...DEFAULT_SETTINGS,
+        appearance: {
+          ...DEFAULT_SETTINGS.appearance,
+          theme:
+            globalTheme === "dark" ? "dark" : "light",
+        },
+      };
     }
 
     const parsed = JSON.parse(saved);
@@ -269,6 +279,11 @@ const readSettings = () => {
       appearance: {
         ...DEFAULT_SETTINGS.appearance,
         ...parsed.appearance,
+        theme:
+          globalTheme === "dark" || globalTheme === "light"
+            ? globalTheme
+            : parsed.appearance?.theme ||
+              DEFAULT_SETTINGS.appearance.theme,
       },
 
       security: {
@@ -295,6 +310,27 @@ const saveSettings = (settings) => {
   } catch {
     // Ignore storage errors.
   }
+};
+
+const applyGlobalTheme = (theme) => {
+  const nextTheme = theme === "dark" ? "dark" : "light";
+
+  document.documentElement.classList.toggle(
+    "dark",
+    nextTheme === "dark"
+  );
+
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  } catch {
+    // Ignore storage errors.
+  }
+
+  window.dispatchEvent(
+    new CustomEvent("theme-change", {
+      detail: { theme: nextTheme },
+    })
+  );
 };
 
 const getInitials = (name) => {
@@ -567,64 +603,52 @@ const SettingsModule = () => {
     useState("Developer");
 
   /* =======================================================================
-     APPLY THEME
+     THEME SYNC
   ======================================================================= */
 
   useEffect(() => {
-    const root = document.documentElement;
+    const handleThemeChange = (event) => {
+      const theme = event.detail?.theme;
 
-    const applyTheme = () => {
-      const theme = settings.appearance.theme;
-
-      if (theme === "dark") {
-        root.classList.add("dark");
+      if (theme !== "dark" && theme !== "light") {
         return;
       }
 
-      if (theme === "light") {
-        root.classList.remove("dark");
+      setSettings((prev) => ({
+        ...prev,
+        appearance: {
+          ...prev.appearance,
+          theme,
+        },
+      }));
+    };
+
+    const handleStorageChange = (event) => {
+      if (event.key !== THEME_STORAGE_KEY) {
         return;
       }
 
-      const prefersDark =
-        window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-
-      root.classList.toggle(
-        "dark",
-        prefersDark
-      );
-    };
-
-    applyTheme();
-
-    const mediaQuery =
-      window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      );
-
-    const handleSystemThemeChange = () => {
-      if (
-        settings.appearance.theme ===
-        "system"
-      ) {
-        applyTheme();
+      if (event.newValue !== "dark" && event.newValue !== "light") {
+        return;
       }
+
+      setSettings((prev) => ({
+        ...prev,
+        appearance: {
+          ...prev.appearance,
+          theme: event.newValue,
+        },
+      }));
     };
 
-    mediaQuery.addEventListener(
-      "change",
-      handleSystemThemeChange
-    );
+    window.addEventListener("theme-change", handleThemeChange);
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      mediaQuery.removeEventListener(
-        "change",
-        handleSystemThemeChange
-      );
+      window.removeEventListener("theme-change", handleThemeChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
-  }, [settings.appearance.theme]);
+  }, []);
 
   /* =======================================================================
      PROFILE
@@ -745,25 +769,25 @@ const SettingsModule = () => {
 
   const changeTheme = useCallback(
     (theme) => {
+      // Navbar and Settings use the same global theme state.
+      const nextTheme = theme === "dark" ? "dark" : "light";
+
       setSettings((prev) => {
         const next = {
           ...prev,
 
           appearance: {
             ...prev.appearance,
-            theme,
+            theme: nextTheme,
           },
         };
 
         saveSettings(next);
-
         return next;
       });
 
-      /*
-       * Important:
-       * Same toast ID prevents duplicate popups.
-       */
+      applyGlobalTheme(nextTheme);
+
       toast.success("Theme updated", {
         id: "theme-updated",
       });

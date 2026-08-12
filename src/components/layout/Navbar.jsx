@@ -19,8 +19,9 @@ const Navbar = ({ onLogout }) => {
   const navigate = useNavigate();
 
   // ======================================================
-  // DARK MODE
+  // THEME
   // ======================================================
+  // Navbar and Settings share the same global theme key.
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
@@ -35,17 +36,59 @@ const Navbar = ({ onLogout }) => {
   const [showResults, setShowResults] = useState(false);
 
   // ======================================================
-  // APPLY DARK MODE
+  // APPLY / SYNC GLOBAL THEME
   // ======================================================
 
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    const applyTheme = (theme) => {
+      const nextTheme = theme === "dark" ? "dark" : "light";
+
+      document.documentElement.classList.toggle(
+        "dark",
+        nextTheme === "dark"
+      );
+
+      localStorage.setItem("theme", nextTheme);
+      setDarkMode(nextTheme === "dark");
+    };
+
+    const handleThemeChange = (event) => {
+      applyTheme(event.detail?.theme);
+    };
+
+    const handleStorageChange = (event) => {
+      if (event.key === "theme") {
+        applyTheme(event.newValue);
+      }
+    };
+
+    applyTheme(localStorage.getItem("theme"));
+
+    window.addEventListener("theme-change", handleThemeChange);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("theme-change", handleThemeChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  const handleThemeToggle = useCallback(() => {
+    const nextTheme = darkMode ? "light" : "dark";
+
+    document.documentElement.classList.toggle(
+      "dark",
+      nextTheme === "dark"
+    );
+
+    localStorage.setItem("theme", nextTheme);
+    setDarkMode(nextTheme === "dark");
+
+    window.dispatchEvent(
+      new CustomEvent("theme-change", {
+        detail: { theme: nextTheme },
+      })
+    );
   }, [darkMode]);
 
   // ======================================================
@@ -643,9 +686,7 @@ const Navbar = ({ onLogout }) => {
 
         <button
           type="button"
-          onClick={() =>
-            setDarkMode((prev) => !prev)
-          }
+          onClick={handleThemeToggle}
           title={
             darkMode
               ? "Switch to light mode"
