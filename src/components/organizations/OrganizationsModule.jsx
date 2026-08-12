@@ -14,7 +14,7 @@ const OrganizationsModule = () => {
   const navigate = useNavigate();
 
   // ===========================
-  // States
+  // STATES
   // ===========================
 
   const [organizations, setOrganizations] =
@@ -34,7 +34,7 @@ const OrganizationsModule = () => {
   const perPage = 5;
 
   // ===========================
-  // Delete Dialog
+  // DELETE DIALOG
   // ===========================
 
   const [deleteDialog, setDeleteDialog] =
@@ -43,7 +43,7 @@ const OrganizationsModule = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   // ===========================
-  // Search + Filter
+  // SEARCH + FILTER
   // ===========================
 
   const filteredOrganizations = useMemo(() => {
@@ -73,7 +73,7 @@ const OrganizationsModule = () => {
   }, [organizations, search, status]);
 
   // ===========================
-  // Pagination
+  // PAGINATION
   // ===========================
 
   const totalPages = Math.ceil(
@@ -87,7 +87,7 @@ const OrganizationsModule = () => {
     );
 
   // ===========================
-  // Create
+  // CREATE
   // ===========================
 
   const handleCreate = () => {
@@ -96,7 +96,7 @@ const OrganizationsModule = () => {
   };
 
   // ===========================
-  // Edit
+  // EDIT
   // ===========================
 
   const handleEdit = (organization) => {
@@ -105,7 +105,7 @@ const OrganizationsModule = () => {
   };
 
   // ===========================
-  // View Details
+  // VIEW DETAILS
   // ===========================
 
   const handleView = (id) => {
@@ -113,7 +113,7 @@ const OrganizationsModule = () => {
   };
 
   // ===========================
-  // Delete
+  // DELETE
   // ===========================
 
   const handleDelete = (id) => {
@@ -133,7 +133,6 @@ const OrganizationsModule = () => {
     setDeleteDialog(false);
     setDeleteId(null);
 
-    // Make sure current page remains valid
     setCurrentPage((page) => {
       const remainingItems =
         organizations.length - 1;
@@ -148,7 +147,7 @@ const OrganizationsModule = () => {
   };
 
   // ===========================
-  // Create / Update
+  // CREATE / UPDATE
   // ===========================
 
   const handleSubmit = (data) => {
@@ -192,25 +191,57 @@ const OrganizationsModule = () => {
     setSelectedOrganization(null);
   };
 
+  // ===========================
+  // RENDER
+  // ===========================
+
   return (
     <div className="w-full min-w-0 space-y-6 overflow-x-hidden">
-      {/* ==================================================
+      {/* ===========================
           HEADER
-      ================================================== */}
+      =========================== */}
 
-      <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
-        {/* Title */}
+      <div
+        className="
+          flex
+          min-w-0
+          flex-col
+          gap-4
+          md:flex-row
+          md:items-center
+          md:justify-between
+          md:gap-5
+        "
+      >
+        {/* TITLE */}
+
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight text-[#172B4D] sm:text-3xl">
+          <h1
+            className="
+              text-2xl
+              font-bold
+              tracking-tight
+              text-[#172B4D]
+              sm:text-3xl
+            "
+          >
             Organizations
           </h1>
 
-          <p className="mt-1 text-sm text-gray-500 sm:text-base">
+          <p
+            className="
+              mt-1
+              text-sm
+              text-gray-500
+              sm:text-base
+            "
+          >
             Manage all organizations and workspaces.
           </p>
         </div>
 
-        {/* Create Button */}
+        {/* CREATE BUTTON */}
+
         <button
           type="button"
           onClick={handleCreate}
@@ -229,7 +260,7 @@ const OrganizationsModule = () => {
             font-semibold
             text-white
             shadow-sm
-            transition
+            transition-all
             duration-200
             hover:bg-blue-700
             active:scale-[0.98]
@@ -238,13 +269,15 @@ const OrganizationsModule = () => {
         >
           <Plus size={18} />
 
-          <span>Create Organization</span>
+          <span>
+            Create Organization
+          </span>
         </button>
       </div>
 
-      {/* ==================================================
+      {/* ===========================
           SEARCH + FILTER
-      ================================================== */}
+      =========================== */}
 
       <div
         className="
@@ -258,8 +291,15 @@ const OrganizationsModule = () => {
           md:justify-between
         "
       >
-        {/* Search */}
-        <div className="w-full min-w-0 md:w-80">
+        {/* SEARCH */}
+
+        <div
+          className="
+            w-full
+            min-w-0
+            md:w-80
+          "
+        >
           <SearchInput
             value={search}
             onChange={(e) => {
@@ -269,7 +309,8 @@ const OrganizationsModule = () => {
           />
         </div>
 
-        {/* Status Filter */}
+        {/* STATUS FILTER */}
+
         <select
           value={status}
           onChange={(e) => {
@@ -295,18 +336,27 @@ const OrganizationsModule = () => {
             md:min-w-[150px]
           "
         >
-          <option value="All">All</option>
-          <option value="Planning">Planning</option>
-          <option value="Active">Active</option>
+          <option value="All">
+            All
+          </option>
+
+          <option value="Planning">
+            Planning
+          </option>
+
+          <option value="Active">
+            Active
+          </option>
+
           <option value="Completed">
             Completed
           </option>
         </select>
       </div>
 
-      {/* ==================================================
+      {/* ===========================
           ORGANIZATION TABLE
-      ================================================== */}
+      =========================== */}
 
       <div className="min-w-0 overflow-x-auto">
         <OrganizationTable
@@ -317,12 +367,20 @@ const OrganizationsModule = () => {
         />
       </div>
 
-      {/* ==================================================
+      {/* ===========================
           PAGINATION
-      ================================================== */}
+      =========================== */}
 
       {totalPages > 1 && (
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div
+          className="
+            flex
+            flex-wrap
+            items-center
+            justify-center
+            gap-2
+          "
+        >
           {[...Array(totalPages)].map(
             (_, index) => {
               const pageNumber = index + 1;
@@ -344,7 +402,8 @@ const OrganizationsModule = () => {
                     rounded-lg
                     text-sm
                     font-medium
-                    transition
+                    transition-all
+                    duration-200
                     ${
                       currentPage === pageNumber
                         ? "bg-[#0052CC] text-white shadow-sm"
@@ -360,9 +419,9 @@ const OrganizationsModule = () => {
         </div>
       )}
 
-      {/* ==================================================
+      {/* ===========================
           CREATE / EDIT MODAL
-      ================================================== */}
+      =========================== */}
 
       <OrganizationModal
         open={open}
@@ -373,6 +432,10 @@ const OrganizationsModule = () => {
         onSubmit={handleSubmit}
         organization={selectedOrganization}
       />
+
+      {/* ===========================
+          DELETE CONFIRMATION
+      =========================== */}
 
       <ConfirmDialog
         open={deleteDialog}
