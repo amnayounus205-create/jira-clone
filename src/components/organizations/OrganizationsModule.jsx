@@ -20,87 +20,69 @@ const OrganizationsModule = () => {
   const [organizations, setOrganizations] =
     useState(organizationData);
 
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
 
   const [selectedOrganization, setSelectedOrganization] =
     useState(null);
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
-  const [status, setStatus] =
-    useState("All");
+  const [status, setStatus] = useState("All");
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const perPage = 5;
 
+  // ===========================
   // Delete Dialog
+  // ===========================
 
   const [deleteDialog, setDeleteDialog] =
     useState(false);
 
-  const [deleteId, setDeleteId] =
-    useState(null);
+  const [deleteId, setDeleteId] = useState(null);
 
   // ===========================
   // Search + Filter
   // ===========================
 
-  const filteredOrganizations =
-    useMemo(() => {
-      return organizations.filter(
-        (organization) => {
-          const matchSearch =
-            organization.name
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              ) ||
-            organization.key
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              ) ||
-            organization.owner
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              );
+  const filteredOrganizations = useMemo(() => {
+    const normalizedSearch = search
+      .trim()
+      .toLowerCase();
 
-          const matchStatus =
-            status === "All" ||
-            organization.status ===
-              status;
+    return organizations.filter((organization) => {
+      const matchSearch =
+        !normalizedSearch ||
+        organization.name
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        organization.key
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        organization.owner
+          .toLowerCase()
+          .includes(normalizedSearch);
 
-          return (
-            matchSearch &&
-            matchStatus
-          );
-        }
-      );
-    }, [
-      organizations,
-      search,
-      status,
-    ]);
+      const matchStatus =
+        status === "All" ||
+        organization.status === status;
+
+      return matchSearch && matchStatus;
+    });
+  }, [organizations, search, status]);
 
   // ===========================
   // Pagination
   // ===========================
 
-  const totalPages =
-    Math.ceil(
-      filteredOrganizations.length /
-        perPage
-    );
+  const totalPages = Math.ceil(
+    filteredOrganizations.length / perPage
+  );
 
   const displayedOrganizations =
     filteredOrganizations.slice(
-      (currentPage - 1) *
-        perPage,
+      (currentPage - 1) * perPage,
       currentPage * perPage
     );
 
@@ -109,10 +91,7 @@ const OrganizationsModule = () => {
   // ===========================
 
   const handleCreate = () => {
-    setSelectedOrganization(
-      null
-    );
-
+    setSelectedOrganization(null);
     setOpen(true);
   };
 
@@ -120,13 +99,8 @@ const OrganizationsModule = () => {
   // Edit
   // ===========================
 
-  const handleEdit = (
-    organization
-  ) => {
-    setSelectedOrganization(
-      organization
-    );
-
+  const handleEdit = (organization) => {
+    setSelectedOrganization(organization);
     setOpen(true);
   };
 
@@ -135,9 +109,7 @@ const OrganizationsModule = () => {
   // ===========================
 
   const handleView = (id) => {
-    navigate(
-      `/organizations/${id}`
-    );
+    navigate(`/organizations/${id}`);
   };
 
   // ===========================
@@ -151,10 +123,7 @@ const OrganizationsModule = () => {
 
   const confirmDelete = () => {
     setOrganizations((prev) =>
-      prev.filter(
-        (item) =>
-          item.id !== deleteId
-      )
+      prev.filter((item) => item.id !== deleteId)
     );
 
     toast.success(
@@ -162,29 +131,37 @@ const OrganizationsModule = () => {
     );
 
     setDeleteDialog(false);
+    setDeleteId(null);
+
+    // Make sure current page remains valid
+    setCurrentPage((page) => {
+      const remainingItems =
+        organizations.length - 1;
+
+      const newTotalPages = Math.max(
+        1,
+        Math.ceil(remainingItems / perPage)
+      );
+
+      return Math.min(page, newTotalPages);
+    });
   };
 
   // ===========================
   // Create / Update
   // ===========================
 
-  const handleSubmit = (
-    data
-  ) => {
-    if (
-      selectedOrganization
-    ) {
-      setOrganizations(
-        (prev) =>
-          prev.map((item) =>
-            item.id ===
-            selectedOrganization.id
-              ? {
-                  ...item,
-                  ...data,
-                }
-              : item
-          )
+  const handleSubmit = (data) => {
+    if (selectedOrganization) {
+      setOrganizations((prev) =>
+        prev.map((item) =>
+          item.id === selectedOrganization.id
+            ? {
+                ...item,
+                ...data,
+              }
+            : item
+        )
       );
 
       toast.success(
@@ -193,25 +170,18 @@ const OrganizationsModule = () => {
     } else {
       const newOrganization = {
         id: Date.now(),
-
         members: 0,
-
         projects: 0,
-
         workspaces: 1,
-
         avatar:
           "https://i.pravatar.cc/100",
-
         ...data,
       };
 
-      setOrganizations(
-        (prev) => [
-          ...prev,
-          newOrganization,
-        ]
-      );
+      setOrganizations((prev) => [
+        ...prev,
+        newOrganization,
+      ]);
 
       toast.success(
         "Organization Created Successfully"
@@ -219,144 +189,205 @@ const OrganizationsModule = () => {
     }
 
     setOpen(false);
+    setSelectedOrganization(null);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full min-w-0 space-y-6 overflow-x-hidden">
+      {/* ==================================================
+          HEADER
+      ================================================== */}
 
-      {/* Header */}
-
-      <div className="flex flex-col md:flex-row justify-between items-center gap-5">
-
-        <div>
-
-          <h1 className="text-3xl font-bold text-[#172B4D]">
+      <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
+        {/* Title */}
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight text-[#172B4D] sm:text-3xl">
             Organizations
           </h1>
 
-          <p className="text-gray-500 mt-1">
-            Manage all organizations
-            and workspaces.
+          <p className="mt-1 text-sm text-gray-500 sm:text-base">
+            Manage all organizations and workspaces.
           </p>
-
         </div>
 
+        {/* Create Button */}
         <button
+          type="button"
           onClick={handleCreate}
-          className="bg-[#0052CC] hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+          className="
+            flex
+            w-full
+            shrink-0
+            items-center
+            justify-center
+            gap-2
+            rounded-lg
+            bg-[#0052CC]
+            px-5
+            py-3
+            text-sm
+            font-semibold
+            text-white
+            shadow-sm
+            transition
+            duration-200
+            hover:bg-blue-700
+            active:scale-[0.98]
+            md:w-auto
+          "
         >
           <Plus size={18} />
 
-          Create Organization
+          <span>Create Organization</span>
         </button>
-
       </div>
 
-      {/* Search + Filter */}
+      {/* ==================================================
+          SEARCH + FILTER
+      ================================================== */}
 
-      <div className="flex flex-col md:flex-row gap-4 justify-between">
-
-        <div className="w-full md:w-80">
-
+      <div
+        className="
+          flex
+          min-w-0
+          flex-col
+          gap-3
+          sm:gap-4
+          md:flex-row
+          md:items-center
+          md:justify-between
+        "
+      >
+        {/* Search */}
+        <div className="w-full min-w-0 md:w-80">
           <SearchInput
             value={search}
             onChange={(e) => {
-              setSearch(
-                e.target.value
-              );
-
+              setSearch(e.target.value);
               setCurrentPage(1);
             }}
           />
-
         </div>
 
+        {/* Status Filter */}
         <select
           value={status}
           onChange={(e) => {
-            setStatus(
-              e.target.value
-            );
-
+            setStatus(e.target.value);
             setCurrentPage(1);
           }}
-          className="border rounded-lg px-4 py-3"
+          className="
+            w-full
+            rounded-lg
+            border
+            border-slate-200
+            bg-white
+            px-4
+            py-3
+            text-sm
+            text-slate-700
+            outline-none
+            transition
+            focus:border-blue-500
+            focus:ring-2
+            focus:ring-blue-500/10
+            md:w-auto
+            md:min-w-[150px]
+          "
         >
-          <option>
-            All
-          </option>
-
-          <option>
-            Planning
-          </option>
-
-          <option>
-            Active
-          </option>
-
-          <option>
+          <option value="All">All</option>
+          <option value="Planning">Planning</option>
+          <option value="Active">Active</option>
+          <option value="Completed">
             Completed
           </option>
-
         </select>
-
       </div>
-            {/* Organization Table */}
 
-      <OrganizationTable
-        organizations={displayedOrganizations}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {/* ==================================================
+          ORGANIZATION TABLE
+      ================================================== */}
 
-      {/* Pagination */}
+      <div className="min-w-0 overflow-x-auto">
+        <OrganizationTable
+          organizations={displayedOrganizations}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </div>
+
+      {/* ==================================================
+          PAGINATION
+      ================================================== */}
 
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {[...Array(totalPages)].map(
+            (_, index) => {
+              const pageNumber = index + 1;
 
-          {[...Array(totalPages)].map((_, index) => (
-
-            <button
-              key={index}
-              onClick={() =>
-                setCurrentPage(index + 1)
-              }
-              className={`w-10 h-10 rounded-lg transition ${
-                currentPage === index + 1
-                  ? "bg-[#0052CC] text-white"
-                  : "border bg-white hover:bg-gray-100"
-              }`}
-            >
-              {index + 1}
-            </button>
-
-          ))}
-
+              return (
+                <button
+                  key={pageNumber}
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage(pageNumber)
+                  }
+                  className={`
+                    flex
+                    h-10
+                    w-10
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-sm
+                    font-medium
+                    transition
+                    ${
+                      currentPage === pageNumber
+                        ? "bg-[#0052CC] text-white shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }
+                  `}
+                >
+                  {pageNumber}
+                </button>
+              );
+            }
+          )}
         </div>
       )}
 
-      {/* Create / Edit Modal */}
+      {/* ==================================================
+          CREATE / EDIT MODAL
+      ================================================== */}
 
       <OrganizationModal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          setOpen(false);
+          setSelectedOrganization(null);
+        }}
         onSubmit={handleSubmit}
         organization={selectedOrganization}
       />
 
-      {/* Delete Confirmation */}
+      {/* ==================================================
+          DELETE CONFIRMATION
+      ================================================== */}
 
       <ConfirmDialog
         open={deleteDialog}
         title="Delete Organization"
         description="Are you sure you want to delete this organization? This action cannot be undone."
-        onCancel={() =>
-          setDeleteDialog(false)
-        }
+        onCancel={() => {
+          setDeleteDialog(false);
+          setDeleteId(null);
+        }}
         onConfirm={confirmDelete}
       />
-
     </div>
   );
 };
